@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi matriz de tensiones · Unidad 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7EDCF; --surface:#FFF8E6; --ink:#2E2D2A; --muted:#6B6A5E;
+  --lila:#C8B5DB; --lila-soft:#E6DCEF; --lila-ink:#6E4F99; --oliva:#7B7F68; --amarillo:#F2BB3F;
+  --line:#E4D7AE; --focus:#6E4F99;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#22211D; --surface:#2D2B26; --ink:#F3EBD3; --muted:#BDB59C;
+    --lila:#5C4A78; --lila-soft:#3B3347; --lila-ink:#CDB8EA; --oliva:#A4A88F; --amarillo:#F2BB3F;
+    --line:#45423A; --focus:#CDB8EA; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#22211D; --surface:#2D2B26; --ink:#F3EBD3; --muted:#BDB59C;
+  --lila:#5C4A78; --lila-soft:#3B3347; --lila-ink:#CDB8EA; --oliva:#A4A88F; --amarillo:#F2BB3F;
+  --line:#45423A; --focus:#CDB8EA; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit }
+html { scroll-padding-top: env(safe-area-inset-top, 0px) }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Work Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem; line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+main { max-width: 42rem; margin: 0 auto; padding: 1.5rem 1.25rem 3rem }
+h1, h2, .stmt, .callout strong {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif; font-optical-sizing: auto;
+}
+h1 { font-size: clamp(2rem, 6.5vw, 2.75rem); line-height: 1.05; font-weight: 600; margin: .35rem 0 1rem; letter-spacing: -.015em }
+h2 { font-size: 1.45rem; line-height: 1.2; font-weight: 600; margin: 0 0 .75rem; letter-spacing: -.01em }
+p { margin: 0 0 1rem; max-width: 36em }
+.tag { display: inline-block; background: var(--lila); color: var(--ink); font-weight: 600; font-size: .8rem; padding: .35rem .85rem; border-radius: 999px; letter-spacing: .02em }
+.muted { color: var(--muted) }
+.panel { background: var(--surface); border-radius: 20px; padding: 1.5rem; margin-top: 1.25rem }
+button, textarea { font: inherit }
+button { cursor: pointer }
+.btn { background: var(--ink); color: var(--bg); border: 0; border-radius: 999px; padding: .85rem 1.5rem; font-weight: 600; font-size: 1rem; transition: transform .08s }
+.btn:active { transform: scale(.98) }
+.btn.secondary { background: transparent; color: var(--ink); border: 2px solid var(--ink) }
+.btn:disabled { opacity: .35; cursor: not-allowed }
+button:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px }
+.row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center }
+
+.trail { margin: 1rem 0 .25rem; height: 28px }
+.trail svg { width: 100%; height: 28px; overflow: visible }
+.count { font-size: .9rem; color: var(--muted); font-weight: 500 }
+.dim { font-weight: 600; color: var(--lila-ink); font-size: .95rem; margin-bottom: .4rem }
+.stmt { font-size: 1.35rem; line-height: 1.35; font-weight: 500; margin: 0 0 1.25rem; letter-spacing: -.005em }
+
+.scale { display: grid; gap: .55rem }
+.opt { display: flex; align-items: flex-start; gap: .8rem; text-align: left; width: 100%; background: var(--bg); color: var(--ink); border: 2px solid var(--line); border-radius: 14px; padding: .8rem 1rem; font-weight: 500; transition: border-color .15s, background .15s }
+.opt .dot { flex: none; width: 1.4rem; height: 1.4rem; margin-top: .1rem; border-radius: 50%; border: 2px solid var(--oliva) }
+.opt small { display: block; font-weight: 400; color: var(--muted); margin-top: .15rem }
+.opt[aria-pressed="true"] { border-color: var(--lila-ink); background: var(--lila) }
+.opt[aria-pressed="true"] small { color: var(--ink) }
+.opt[aria-pressed="true"] .dot { border-color: var(--ink); background: var(--amarillo) }
+
+.pista { margin-top: 1rem; border-left: 6px solid var(--amarillo); padding: .35rem 0 .35rem 1rem; font-weight: 500 }
+
+.freq-item { padding: .9rem 0; border-bottom: 1px solid var(--line) }
+.freq-item:last-child { border-bottom: 0 }
+.freq-item .q { font-weight: 600; margin-bottom: .1rem }
+.freq-item .t { color: var(--muted); font-size: .95rem; margin-bottom: .6rem }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem }
+.seg button { background: var(--bg); color: var(--ink); border: 2px solid var(--line); border-radius: 12px; padding: .6rem .4rem; font-weight: 500; font-size: .92rem; line-height: 1.25 }
+.seg button[aria-pressed="true"] { background: var(--lila); border-color: var(--lila-ink) }
+
+textarea { width: 100%; min-height: 11rem; resize: vertical; background: var(--bg); color: var(--ink); border: 2px solid var(--line); border-radius: 14px; padding: .9rem 1rem; line-height: 1.5 }
+.contador { font-size: .9rem; color: var(--muted); margin-top: .4rem; font-variant-numeric: tabular-nums }
+.contador.excede { color: var(--lila-ink); font-weight: 600 }
+
+.nav { margin-top: 1.25rem; justify-content: space-between }
+.link { background: none; border: 0; color: var(--ink); font-weight: 500; text-decoration: underline; padding: .5rem 0 }
+
+/* matriz */
+.wrap-x { overflow-x: auto; margin: .5rem -.25rem 0; padding: .25rem }
+.matriz { display: grid; grid-template-columns: minmax(8.5rem, 1.2fr) repeat(3, minmax(6.5rem, 1fr)); gap: 6px; min-width: 32rem }
+.mh { font-size: .82rem; font-weight: 600; color: var(--muted); text-align: center; padding: .25rem .25rem .4rem; align-self: end; line-height: 1.2 }
+.mh.eje { text-align: left }
+.ml { background: var(--surface); border-radius: 12px; padding: .7rem .75rem; font-weight: 600; display: flex; flex-direction: column; justify-content: center; gap: .3rem }
+.ml .prio { align-self: flex-start; background: var(--amarillo); color: #2E2D2A; font-size: .72rem; font-weight: 700; padding: .15rem .55rem; border-radius: 999px }
+.mc { border-radius: 12px; min-height: 4.6rem; padding: .55rem .6rem; font-size: .85rem; line-height: 1.3; background: transparent; border: 2px dashed var(--line) }
+.mc.on { border: 2px solid var(--lila-ink); font-weight: 600 }
+.mc.on.f1 { background: var(--lila-soft) }
+.mc.on.f2 { background: var(--lila) }
+.mc.on.f3 { background: var(--lila); box-shadow: inset 0 0 0 3px var(--amarillo) }
+.fila-prio .ml { box-shadow: inset 0 0 0 2px var(--amarillo) }
+.flecha { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-top: .35rem; min-width: 32rem }
+
+.ruta { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0 .75rem; padding: 0; list-style: none }
+.ruta li { width: 2.4rem; height: 2.4rem; border-radius: 50%; display: grid; place-items: center; font-weight: 600; border: 2px solid var(--line); color: var(--muted) }
+.ruta li.si { background: var(--lila); border-color: var(--lila-ink); color: var(--ink) }
+.ruta li.prio { background: var(--amarillo); border-color: var(--ink); color: #2E2D2A }
+.ruta-leyenda { font-size: .88rem; color: var(--muted); margin: 0 }
+
+.callout { border-left: 6px solid var(--amarillo); padding: .25rem 0 .25rem 1rem; margin: 1.25rem 0 }
+.callout.lila { border-color: var(--lila-ink) }
+.callout strong { display: block; margin-bottom: .2rem; font-weight: 600; font-size: 1.05rem }
+.cita { white-space: pre-wrap; font-style: italic; margin: .4rem 0 0 }
+
+.toast { font-size: .9rem; color: var(--muted); min-height: 1.4em }
+[hidden] { display: none !important }
+@media (prefers-reduced-motion: no-preference){ .trail circle { transition: cx .35s ease, r .35s ease } }
+</style>
+</head>
+<body>
+<main>
+
+  <section id="inicio">
+    <span class="tag">Unidad 1 · Lección 1.3</span>
+    <h1>Mi matriz de tensiones</h1>
+    <p>Este cuestionario no tiene respuestas correctas. Elige en cada pregunta la opción que más se parezca a tu aula hoy.</p>
+    <p class="muted">Al final tendrás tu propia matriz de tensiones en las tres dimensiones del aula multigrado: pedagógica, organizacional y contextual. La retomaremos al cerrar el curso.</p>
+    <div class="row" style="margin-top:1.5rem">
+      <button class="btn" id="empezar">Armar mi matriz</button>
+      <button class="btn secondary" id="retomar" hidden>Ver mi última matriz</button>
+    </div>
+    <p class="muted" style="margin-top:1rem;font-size:.9rem">Toma unos 10 minutos.</p>
+  </section>
+
+  <section id="cuestionario" hidden>
+    <div class="trail" aria-hidden="true"><svg id="trail-svg" viewBox="0 0 300 28" preserveAspectRatio="none"></svg></div>
+    <div class="count" id="count" aria-live="polite"></div>
+    <div class="panel">
+      <div class="dim" id="dim"></div>
+      <p class="stmt" id="stmt"></p>
+      <div id="cuerpo"></div>
+      <div class="row nav">
+        <button class="link" id="back">Anterior</button>
+        <button class="btn" id="next" disabled>Siguiente</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultado" hidden>
+    <span class="tag">Tu diagnóstico de entrada</span>
+    <h1>Tu matriz de tensiones</h1>
+    <p class="muted">Cada fila es una dimensión de tu aula. La tensión que elegiste aparece en la columna de la frecuencia con que la sientes.</p>
+
+    <div class="wrap-x">
+      <div class="matriz" id="matriz" role="table" aria-label="Matriz de tensiones por dimensión y frecuencia"></div>
+      <div class="flecha" aria-hidden="true"><span></span><span>menos presente</span><span>más presente</span></div>
+    </div>
+
+    <div class="callout" id="lectura"></div>
+
+    <div class="panel">
+      <h2>Dónde lo trabajarás</h2>
+      <p class="muted" style="margin-bottom:.25rem">Unidades del curso donde aparecen tus tres tensiones.</p>
+      <ul class="ruta" id="ruta" aria-label="Unidades del curso relacionadas con tus tensiones"></ul>
+      <p class="ruta-leyenda" id="ruta-leyenda"></p>
+      <div id="ruta-detalle" style="margin-top:1rem"></div>
+    </div>
+
+    <div class="callout lila" id="descripcion"></div>
+
+    <div class="panel">
+      <h2>Antes de seguir</h2>
+      <p>Esta matriz es el punto de partida de tu <strong>Evidencia 1: Mapa visual de mi aula</strong>, que armarás al cierre de la Unidad 2.</p>
+      <p class="muted" style="margin-bottom:0">Guarda una captura de pantalla o copia tu matriz. En la Unidad 10 la vas a comparar con lo que ves en tu aula al terminar el curso.</p>
+    </div>
+
+    <div class="row" style="margin-top:1.25rem">
+      <button class="btn" id="copiar">Copiar mi matriz</button>
+      <button class="btn secondary" id="rehacer">Responder de nuevo</button>
+    </div>
+    <p class="toast" id="toast" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var DIMENSIONES = [
+    {
+      nombre: "Pedagógica",
+      titulo: "Dimensión pedagógica",
+      pregunta: "En tu aula, ¿qué te cuesta más al momento de enseñar?",
+      opciones: [
+        { texto: "Atender a todos los niveles al mismo tiempo sin dejar a nadie esperando.", corto: "Atender todos los niveles a la vez", pista: "Lo trabajarás en la Unidad 3 (diferenciación y DUA) y la Unidad 4 (planificación multinivel).", unidades: [3, 4] },
+        { texto: "Terminar haciendo clases separadas por grado, como si fueran varios cursos en uno.", corto: "Clases separadas por grado", pista: "En la Unidad 4 verás modelos para integrar objetivos de distintos niveles.", unidades: [4] },
+        { texto: "Saber qué aprendió realmente cada estudiante.", corto: "Saber qué aprendió cada estudiante", pista: "La Unidad 8 está dedicada a la evaluación formativa en aulas multinivel.", unidades: [8] },
+        { texto: "Que los contenidos tengan sentido para la vida de mis estudiantes.", corto: "Contenidos con sentido para su vida", pista: "Lo abordarás desde la Unidad 1 y con fuerza en las Unidades 6 y 9.", unidades: [1, 6, 9] }
+      ]
+    },
+    {
+      nombre: "Organizacional",
+      titulo: "Dimensión organizacional",
+      pregunta: "¿Qué es lo que más ordena (o desordena) tu jornada?",
+      opciones: [
+        { texto: "Las tareas administrativas le quitan tiempo a la enseñanza.", corto: "Lo administrativo le quita tiempo a enseñar", pista: "Es una tensión muy común en escuelas pequeñas. El Módulo 3 la aborda en profundidad.", unidades: [], modulo3: true },
+        { texto: "El espacio de la sala no permite trabajar en grupos o rincones.", corto: "El espacio no permite grupos ni rincones", pista: "En la Unidad 5 verás cómo diseñar el ambiente para la cooperación.", unidades: [5] },
+        { texto: "Me faltan materiales o recursos adecuados para varios niveles.", corto: "Faltan materiales para varios niveles", pista: "Las Unidades 3 y 7 te darán ideas para adaptar y producir materiales sencillos.", unidades: [3, 7] },
+        { texto: "No tengo tiempo para planificar como me gustaría.", corto: "Poco tiempo para planificar", pista: "La Unidad 4 propone formas de planificar más sostenibles para el multigrado.", unidades: [4] }
+      ]
+    },
+    {
+      nombre: "Contextual",
+      titulo: "Dimensión contextual",
+      pregunta: "¿Qué aspecto del entorno pesa más en tu aula?",
+      opciones: [
+        { texto: "El currículum no refleja la realidad de mi territorio.", corto: "Currículum lejano a mi territorio", pista: "Es el tema de esta misma unidad y vuelve en la Unidad 9.", unidades: [1, 9] },
+        { texto: "Me cuesta que las familias participen en el aprendizaje.", corto: "Poca participación de las familias", pista: "En la Unidad 6 verás proyectos que vinculan la escuela con la comunidad.", unidades: [6] },
+        { texto: "Mis estudiantes llegan con preocupaciones o cansancio que afectan su aprendizaje.", corto: "Estudiantes con preocupaciones o cansancio", pista: "La Unidad 2 trata la relación entre emoción, estrés y aprendizaje.", unidades: [2] },
+        { texto: "La conectividad o el acceso a tecnología es limitado.", corto: "Conectividad o tecnología limitada", pista: "La Unidad 7 está pensada para condiciones de baja conectividad.", unidades: [7] }
+      ]
+    }
+  ];
+
+  var FRECUENCIA = ["Casi nunca", "A veces", "Casi todos los días"];
+  var LETRAS = ["a", "b", "c", "d"];
+  var UNIDADES = {
+    1: "Currículum y ruralidad", 2: "Neurociencia educativa", 3: "Diferenciación y DUA",
+    4: "Planificación multinivel", 5: "Aprendizaje cooperativo", 6: "Proyectos y A+S",
+    7: "Tecnología pertinente", 8: "Evaluación formativa", 9: "Lectura, escritura y matemática", 10: "Propuesta integradora"
+  };
+  var PASOS = ["d0", "d1", "d2", "frecuencia", "prioridad", "descripcion"];
+  var MAX_PALABRAS = 150;
+  var MIN_PALABRAS = 5;
+  var ALMACEN = "m2u1-matriz-tensiones-v1";
+
+  var estado;
+  var actual = 0;
+
+  function nuevoEstado() {
+    return { eleccion: [null, null, null], frecuencia: [null, null, null], prioridad: null, descripcion: "" };
+  }
+
+  function nodo(id) { return document.getElementById(id); }
+  function palabras(t) { return t.trim().split(/\s+/).filter(Boolean).length; }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function mostrar(seccion) {
+    ["inicio", "cuestionario", "resultado"].forEach(function (id) { nodo(id).hidden = id !== seccion; });
+    window.scrollTo({ top: 0 });
+  }
+
+  function guardar() {
+    try { localStorage.setItem(ALMACEN, JSON.stringify({ estado: estado, fecha: new Date().toISOString() })); } catch (e) {}
+  }
+
+  function cargar() {
+    try {
+      var raw = localStorage.getItem(ALMACEN);
+      if (!raw) return null;
+      var d = JSON.parse(raw).estado;
+      var ok = d && Array.isArray(d.eleccion) && d.eleccion.length === 3 &&
+        d.eleccion.every(function (v) { return Number.isInteger(v) && v >= 0 && v <= 3; }) &&
+        Array.isArray(d.frecuencia) && d.frecuencia.every(function (v) { return Number.isInteger(v) && v >= 0 && v <= 2; }) &&
+        Number.isInteger(d.prioridad) && d.prioridad >= 0 && d.prioridad <= 2 &&
+        typeof d.descripcion === "string";
+      return ok ? d : null;
+    } catch (e) { return null; }
+  }
+
+  function opcionElegida(k) { return DIMENSIONES[k].opciones[estado.eleccion[k]]; }
+
+  function pasoCompleto() {
+    var p = PASOS[actual];
+    if (p.charAt(0) === "d" && p.length === 2) return estado.eleccion[Number(p.charAt(1))] !== null;
+    if (p === "frecuencia") return estado.frecuencia.every(function (v) { return v !== null; });
+    if (p === "prioridad") return estado.prioridad !== null;
+    var n = palabras(estado.descripcion);
+    return n >= MIN_PALABRAS && n <= MAX_PALABRAS;
+  }
+
+  function dibujarCamino() {
+    var total = PASOS.length, paso = 288 / (total - 1), puntos = [];
+    for (var k = 0; k < total; k++) puntos.push([6 + k * paso, 14 - Math.sin((k / (total - 1)) * Math.PI * 2) * 6]);
+    var trazo = puntos.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(2) + " " + p[1].toFixed(2); }).join(" ");
+    var html = '<path d="' + trazo + '" fill="none" stroke="var(--oliva)" stroke-width="2" stroke-dasharray="5 5" stroke-linejoin="round"/>';
+    puntos.forEach(function (p, k) {
+      var relleno = k === actual ? "var(--amarillo)" : (k < actual ? "var(--lila-ink)" : "var(--surface)");
+      html += '<circle cx="' + p[0].toFixed(2) + '" cy="' + p[1].toFixed(2) + '" r="' + (k === actual ? 6 : 4) + '" fill="' + relleno + '" stroke="var(--oliva)" stroke-width="1.5"/>';
+    });
+    nodo("trail-svg").innerHTML = html;
+  }
+
+  function actualizarNav() {
+    nodo("next").disabled = !pasoCompleto();
+    nodo("next").textContent = actual === PASOS.length - 1 ? "Ver mi matriz" : "Siguiente";
+    nodo("back").style.visibility = actual === 0 ? "hidden" : "visible";
+  }
+
+  function pintarPaso() {
+    var p = PASOS[actual];
+    var cuerpo = nodo("cuerpo");
+    nodo("count").textContent = "Pregunta " + (actual + 1) + " de " + PASOS.length;
+
+    if (p.length === 2 && p.charAt(0) === "d") {
+      var k = Number(p.charAt(1)), dim = DIMENSIONES[k], sel = estado.eleccion[k];
+      nodo("dim").textContent = dim.titulo;
+      nodo("stmt").textContent = dim.pregunta;
+      cuerpo.innerHTML = '<div class="scale" role="group" aria-labelledby="stmt">' +
+        dim.opciones.map(function (o, i) {
+          return '<button type="button" class="opt" data-accion="eleccion" data-dim="' + k + '" data-valor="' + i + '" aria-pressed="' + (sel === i) + '">' +
+            '<span class="dot" aria-hidden="true"></span><span>' + LETRAS[i] + ') ' + esc(o.texto) + '</span></button>';
+        }).join("") + '</div>' +
+        '<div class="pista" aria-live="polite"' + (sel === null ? " hidden" : "") + '>' + (sel === null ? "" : esc(dim.opciones[sel].pista)) + '</div>';
+    } else if (p === "frecuencia") {
+      nodo("dim").textContent = "Intensidad";
+      nodo("stmt").textContent = "¿Con qué frecuencia sientes cada tensión que elegiste?";
+      cuerpo.innerHTML = DIMENSIONES.map(function (dim, k) {
+        return '<div class="freq-item"><div class="q">' + dim.titulo + '</div><div class="t">' + esc(opcionElegida(k).texto) + '</div>' +
+          '<div class="seg" role="group" aria-label="Frecuencia, ' + dim.titulo + '">' +
+          FRECUENCIA.map(function (f, i) {
+            return '<button type="button" data-accion="frecuencia" data-dim="' + k + '" data-valor="' + i + '" aria-pressed="' + (estado.frecuencia[k] === i) + '">' + f + '</button>';
+          }).join("") + '</div></div>';
+      }).join("");
+    } else if (p === "prioridad") {
+      nodo("dim").textContent = "Prioridad";
+      nodo("stmt").textContent = "Si pudieras resolver solo una de las tres tensiones este año, ¿cuál elegirías?";
+      cuerpo.innerHTML = '<div class="scale" role="group" aria-labelledby="stmt">' +
+        DIMENSIONES.map(function (dim, k) {
+          return '<button type="button" class="opt" data-accion="prioridad" data-valor="' + k + '" aria-pressed="' + (estado.prioridad === k) + '">' +
+            '<span class="dot" aria-hidden="true"></span><span>' + LETRAS[k] + ') La ' + dim.nombre.toLowerCase() +
+            '<small>' + esc(opcionElegida(k).corto) + ' · ' + FRECUENCIA[estado.frecuencia[k]].toLowerCase() + '</small></span></button>';
+        }).join("") + '</div>';
+    } else {
+      var dp = DIMENSIONES[estado.prioridad];
+      nodo("dim").textContent = "Tu tensión prioritaria · " + dp.nombre;
+      nodo("stmt").textContent = "Describe tu tensión prioritaria con una situación concreta de tu aula. ¿Cuándo aparece, a quiénes afecta y qué has intentado hasta ahora?";
+      cuerpo.innerHTML = '<p class="muted" style="margin-top:-.5rem">Elegiste: ' + esc(opcionElegida(estado.prioridad).texto) + '</p>' +
+        '<label for="texto" class="muted" style="display:block;font-size:.9rem;margin-bottom:.35rem">Máximo 150 palabras.</label>' +
+        '<textarea id="texto" placeholder="Por ejemplo: los martes, cuando trabajo lectura con 1° y 2°…"></textarea>' +
+        '<div class="contador" id="contador" aria-live="polite"></div>';
+      var ta = nodo("texto");
+      ta.value = estado.descripcion;
+      ta.addEventListener("input", function () {
+        estado.descripcion = ta.value;
+        pintarContador();
+        actualizarNav();
+      });
+      pintarContador();
+    }
+    actualizarNav();
+    dibujarCamino();
+  }
+
+  function pintarContador() {
+    var n = palabras(estado.descripcion), c = nodo("contador");
+    if (!c) return;
+    c.textContent = n + " de " + MAX_PALABRAS + " palabras" + (n > MAX_PALABRAS ? ". Acorta tu texto para continuar." : "");
+    c.className = "contador" + (n > MAX_PALABRAS ? " excede" : "");
+  }
+
+  nodo("cuerpo").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button[data-accion]");
+    if (!btn) return;
+    var accion = btn.dataset.accion, valor = Number(btn.dataset.valor);
+    if (accion === "eleccion") {
+      var k = Number(btn.dataset.dim);
+      estado.eleccion[k] = valor;
+    } else if (accion === "frecuencia") {
+      estado.frecuencia[Number(btn.dataset.dim)] = valor;
+    } else if (accion === "prioridad") {
+      estado.prioridad = valor;
+    }
+    pintarPaso();
+  });
+
+  nodo("next").addEventListener("click", function () {
+    if (!pasoCompleto()) return;
+    if (actual < PASOS.length - 1) { actual++; pintarPaso(); window.scrollTo({ top: 0 }); }
+    else { estado.descripcion = estado.descripcion.trim(); guardar(); verResultado(); }
+  });
+  nodo("back").addEventListener("click", function () { if (actual > 0) { actual--; pintarPaso(); } });
+
+  function pintarMatriz() {
+    var html = '<div class="mh eje" role="columnheader">Dimensión</div>' +
+      FRECUENCIA.map(function (f) { return '<div class="mh" role="columnheader">' + f + '</div>'; }).join("");
+    DIMENSIONES.forEach(function (dim, k) {
+      var esPrio = estado.prioridad === k;
+      html += '<div class="ml' + '" role="rowheader"' + (esPrio ? ' style="box-shadow: inset 0 0 0 2px var(--amarillo)"' : "") + '>' +
+        dim.nombre + (esPrio ? '<span class="prio">Mi prioridad</span>' : "") + '</div>';
+      FRECUENCIA.forEach(function (_, i) {
+        var on = estado.frecuencia[k] === i;
+        html += '<div class="mc' + (on ? " on f" + (i + 1) : "") + '" role="cell">' + (on ? esc(opcionElegida(k).corto) : "") + '</div>';
+      });
+    });
+    nodo("matriz").innerHTML = html;
+  }
+
+  function pintarLectura() {
+    var maxF = Math.max.apply(null, estado.frecuencia);
+    var masFrecuentes = [];
+    estado.frecuencia.forEach(function (f, k) { if (f === maxF) masFrecuentes.push(k); });
+    var dp = DIMENSIONES[estado.prioridad];
+    var html;
+    if (masFrecuentes.indexOf(estado.prioridad) !== -1) {
+      html = '<strong>Tu prioridad coincide con lo que más sientes</strong>Elegiste la tensión ' + dp.nombre.toLowerCase() +
+        ', que también es la que aparece con más frecuencia en tu aula. Es un buen lugar para poner energía: es visible y cotidiana.';
+    } else {
+      var otra = DIMENSIONES[masFrecuentes[0]].nombre.toLowerCase();
+      html = '<strong>Tu prioridad no es la que más se repite</strong>La tensión ' + otra +
+        ' aparece con más frecuencia, pero elegiste priorizar la ' + dp.nombre.toLowerCase() +
+        '. Está bien: una prioridad no se define solo por frecuencia. ¿Qué te hizo elegirla?';
+    }
+    if (estado.frecuencia.every(function (f) { return f === 2; })) {
+      html = '<strong>Las tres tensiones están presentes casi todos los días</strong>Es la realidad de muchas aulas multigrado. Por eso es tan importante haber elegido una prioridad: no se puede resolver todo a la vez.';
+    }
+    nodo("lectura").innerHTML = html;
+  }
+
+  function pintarRuta() {
+    var todas = {}, prioUnidades = opcionElegida(estado.prioridad).unidades, hayModulo3 = false;
+    DIMENSIONES.forEach(function (_, k) {
+      var o = opcionElegida(k);
+      o.unidades.forEach(function (u) { todas[u] = true; });
+      if (o.modulo3) hayModulo3 = true;
+    });
+    var html = "";
+    for (var u = 1; u <= 10; u++) {
+      var clase = prioUnidades.indexOf(u) !== -1 ? "prio" : (todas[u] ? "si" : "");
+      html += '<li class="' + clase + '" title="Unidad ' + u + ': ' + UNIDADES[u] + '" aria-label="Unidad ' + u + ': ' + UNIDADES[u] + (clase === "prio" ? ", tu prioridad" : (clase ? ", relacionada" : "")) + '">' + u + '</li>';
+    }
+    nodo("ruta").innerHTML = html;
+    nodo("ruta-leyenda").textContent = "Amarillo: unidades de tu tensión prioritaria. Lila: unidades de tus otras tensiones." +
+      (hayModulo3 ? " Tu tensión organizacional se trabaja en profundidad en el Módulo 3 (Liderazgo pedagógico y articulación)." : "");
+    nodo("ruta-detalle").innerHTML = DIMENSIONES.map(function (dim, k) {
+      return '<p style="margin-bottom:.6rem"><strong>' + dim.nombre + ':</strong> ' + esc(opcionElegida(k).pista) + '</p>';
+    }).join("");
+  }
+
+  function pintarDescripcion() {
+    var c = nodo("descripcion");
+    c.innerHTML = '<strong>Tu tensión prioritaria en tus palabras</strong><p class="cita"></p>';
+    c.querySelector(".cita").textContent = "«" + estado.descripcion + "»";
+  }
+
+  function verResultado(cargado) {
+    if (cargado) estado = cargado;
+    pintarMatriz();
+    pintarLectura();
+    pintarRuta();
+    pintarDescripcion();
+    mostrar("resultado");
+  }
+
+  function reiniciar() {
+    estado = nuevoEstado();
+    actual = 0;
+    pintarPaso();
+    mostrar("cuestionario");
+  }
+
+  nodo("empezar").addEventListener("click", reiniciar);
+  nodo("rehacer").addEventListener("click", reiniciar);
+  nodo("retomar").addEventListener("click", function () { var d = cargar(); if (d) verResultado(d); });
+
+  nodo("copiar").addEventListener("click", async function () {
+    var lineas = DIMENSIONES.map(function (dim, k) {
+      return dim.nombre + ": " + opcionElegida(k).corto + " (" + FRECUENCIA[estado.frecuencia[k]].toLowerCase() + ")" + (estado.prioridad === k ? " ← mi prioridad" : "");
+    });
+    var texto = "Mi matriz de tensiones\n" + lineas.join("\n") + "\n\nMi tensión prioritaria en mis palabras:\n" + estado.descripcion;
+    try {
+      await navigator.clipboard.writeText(texto);
+      nodo("toast").textContent = "Matriz copiada. Pégala en tu cuaderno o en la plantilla de tu Evidencia 1.";
+    } catch (e) {
+      nodo("toast").textContent = "No se pudo copiar. Toma una captura de pantalla de tu matriz.";
+    }
+  });
+
+  estado = nuevoEstado();
+  if (cargar()) nodo("retomar").hidden = false;
+})();
+</script>
+</body>
+</html>
